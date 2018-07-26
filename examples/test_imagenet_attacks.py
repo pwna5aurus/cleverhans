@@ -15,10 +15,10 @@ $ ./download_checkpoints.sh
 
 # pylint: disable=bad-indentation
 # pylint: disable=g-bad-import-order
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+
+
+
+
 
 import csv
 import os
@@ -34,7 +34,7 @@ from cleverhans.devtools.checks import CleverHansTest
 from cleverhans.model import Model
 
 DEFAULT_INCEPTION_PATH = (
-    '../examples/nips17_adversarial_competition/sample_attacks/fgsm/'
+    '../examples/nips17_adversarial_competition/dev_toolkit/sample_attacks/fgsm/'
     'inception_v3.ckpt')
 
 tf.flags.DEFINE_string(
@@ -69,11 +69,11 @@ def load_images(input_dir, metadata_file_path, batch_shape):
     row_idx_true_label = header_row.index('TrueLabel')
     images = np.zeros(batch_shape)
     labels = np.zeros(num_images, dtype=np.int32)
-    for idx in xrange(num_images):
+    for idx in range(num_images):
         row = rows[idx]
         filepath = os.path.join(input_dir, row[row_idx_image_id] + '.png')
 
-        with tf.gfile.Open(filepath) as f:
+        with tf.gfile.Open(filepath, 'rb') as f:
             image = np.array(
                 Image.open(f).convert('RGB')).astype(np.float) / 255.0
         images[idx, :, :, :] = image
@@ -84,8 +84,8 @@ def load_images(input_dir, metadata_file_path, batch_shape):
 class InceptionModel(Model):
     """Model class for CleverHans library."""
 
-    def __init__(self, num_classes):
-        self.num_classes = num_classes
+    def __init__(self, nb_classes):
+        self.nb_classes = nb_classes
         self.built = False
 
     def __call__(self, x_input, return_logits=False):
@@ -95,7 +95,7 @@ class InceptionModel(Model):
             # Inception preprocessing uses [-1, 1]-scaled input.
             x_input = x_input * 2.0 - 1.0
             _, end_points = inception.inception_v3(
-                x_input, num_classes=self.num_classes, is_training=False,
+                x_input, num_classes=self.nb_classes, is_training=False,
                 reuse=reuse)
         self.built = True
         self.logits = end_points['Logits']
@@ -189,7 +189,7 @@ class TestSPSA(CleverHansTest):
 
             with tf.train.MonitoredSession(
                     session_creator=session_creator) as sess:
-                for i in xrange(num_images):
+                for i in range(num_images):
                     adv_image = sess.run(x_adv, feed_dict={
                         x_input: np.expand_dims(images[i], axis=0),
                         y_label: np.expand_dims(labels[i], axis=0),
@@ -236,7 +236,7 @@ class TestSPSA(CleverHansTest):
             num_correct = 0.
             with tf.train.MonitoredSession(
                     session_creator=session_creator) as sess:
-                for i in xrange(num_images):
+                for i in range(num_images):
                     acc_val = sess.run(acc, feed_dict={
                         x_input: np.expand_dims(images[i], axis=0),
                         y_label: np.expand_dims(labels[i], axis=0),
